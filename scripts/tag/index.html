@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>控件标注工具</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 20px;
+        max-width: 800px;
+      }
+      img {
+        max-width: 100%;
+        border: 1px solid #ccc;
+        margin-bottom: 10px;
+      }
+      select,
+      button {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+      .meta {
+        margin-bottom: 10px;
+      }
+      .nav-buttons {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>控件标注工具</h2>
+    <div id="viewer">
+      <img id="viewImg" src="" alt="控件图片" />
+      <div class="meta">
+        <strong>控件文字：</strong><span id="viewLabel"></span><br />
+        <strong>控件类型：</strong><span id="viewClass"></span>
+      </div>
+      <label
+        >功能分类：
+        <select id="category">
+          <option value="">请选择标签</option>
+          <option value="文件操作">文件操作</option>
+          <option value="文本编辑">文本编辑</option>
+          <option value="格式设置">格式设置</option>
+          <option value="导航跳转">导航跳转</option>
+          <option value="搜索替换">搜索替换</option>
+          <option value="配置/设置">配置/设置</option>
+          <option value="确认/对话框">确认/对话框</option>
+          <option value="布局相关">布局相关</option>
+          <option value="其他">其他</option>
+        </select>
+      </label>
+      <div class="nav-buttons">
+        <button onclick="prev()">← 上一个</button>
+        <button onclick="next()">下一个 →</button>
+        <button onclick="save()">保存当前标注</button>
+      </div>
+    </div>
+
+    <script>
+      const data = []; // 在此填入你提取好的控件数据
+      const annotations = {};
+
+      let currentIndex = 0;
+
+      // 示例数据（填入你导出的控制数据 JSON）
+      // 你可以在导出文件中自动填入此结构
+      const rawData = [
+        {
+          label: "Check list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Delete lines",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Delete lines",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Bold",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "8ea39a05d039c2e293e36594a012cf34",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_8ea39a05d039c2e293e36594a012cf34.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Inline code",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "8ea39a05d039c2e293e36594a012cf34",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_8ea39a05d039c2e293e36594a012cf34.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Search",
+          view_str: "3fe11f93fecb08f16e03ddd81c9bec5d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_3fe11f93fecb08f16e03ddd81c9bec5d.png",
+          class: "android.widget.EditText",
+        },
+        {
+          label: "CANCEL",
+          view_str: "676fa9dd0db0a13a793a2330e38cc514",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_676fa9dd0db0a13a793a2330e38cc514.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Unordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "8ea39a05d039c2e293e36594a012cf34",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_8ea39a05d039c2e293e36594a012cf34.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "```",
+          view_str: "17be54ad07694f5a8c45349a5521d3cc",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_17be54ad07694f5a8c45349a5521d3cc.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Unordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "View mode",
+          view_str: "eb2d5cb6b1afbc3b4fb50ed477535c10",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_eb2d5cb6b1afbc3b4fb50ed477535c10.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Sort by",
+          view_str: "359eae9dfa4a4783de05ea78785ccfb3",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_359eae9dfa4a4783de05ea78785ccfb3.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Go to",
+          view_str: "c6ec555929c216d5d492d34fc41d225a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c6ec555929c216d5d492d34fc41d225a.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "To-Do",
+          view_str: "6816cb86c5147f3ace2dbe604fcc34f7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_6816cb86c5147f3ace2dbe604fcc34f7.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Search",
+          view_str: "7aeb6fa83d70cba74b4aa2eecb1f359e",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_7aeb6fa83d70cba74b4aa2eecb1f359e.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Search",
+          view_str: "13f1244ed3ba5df90e1b8e639eb1bd33",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_13f1244ed3ba5df90e1b8e639eb1bd33.png",
+          class: "android.widget.EditText",
+        },
+        {
+          label: "SEARCH / REPLACE",
+          view_str: "c9eb5c717685c703a99f9a531874fab3",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c9eb5c717685c703a99f9a531874fab3.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "CANCEL",
+          view_str: "adeb12e59624b77414a8ce245f3f8f1c",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_adeb12e59624b77414a8ce245f3f8f1c.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Open link",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "CANCEL",
+          view_str: "c0079550d8537d14f1832670b8d52b36",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c0079550d8537d14f1832670b8d52b36.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Archive completed tasks",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Start new line below",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Start new line below",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Undo",
+          view_str: "be8b2ce4e58d648132daec71cdca9987",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_be8b2ce4e58d648132daec71cdca9987.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Move text one line down",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Sort alphabetically",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date only",
+          view_str: "a1f78cb06c9ff651d54ab469f4f32eff",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_a1f78cb06c9ff651d54ab469f4f32eff.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More",
+          view_str: "480f04d1bdab6ff2655791d31ccd7983",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_480f04d1bdab6ff2655791d31ccd7983.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Bold",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Undo",
+          view_str: "be8b2ce4e58d648132daec71cdca9987",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_be8b2ce4e58d648132daec71cdca9987.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "OK",
+          view_str: "d35fcc1fc7eb82164101bfa67dae8526",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_d35fcc1fc7eb82164101bfa67dae8526.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "To-Do",
+          view_str: "6816cb86c5147f3ace2dbe604fcc34f7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_6816cb86c5147f3ace2dbe604fcc34f7.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Search",
+          view_str: "7aeb6fa83d70cba74b4aa2eecb1f359e",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_7aeb6fa83d70cba74b4aa2eecb1f359e.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "CANCEL",
+          view_str: "c0079550d8537d14f1832670b8d52b36",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c0079550d8537d14f1832670b8d52b36.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Archive completed tasks",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Move text one line down",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Files",
+          view_str: "9ad30f5c7e74b12f7bca57dcd8dbddaf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9ad30f5c7e74b12f7bca57dcd8dbddaf.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "QuickNote",
+          view_str: "046597b2795b890bde2439f66d1f753a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_046597b2795b890bde2439f66d1f753a.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Check list",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Delete lines",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Unordered list",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Undo",
+          view_str: "be8b2ce4e58d648132daec71cdca9987",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_be8b2ce4e58d648132daec71cdca9987.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Bold",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Attach",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date",
+          view_str: "69529c1021b4265900fa57cb6493f3be",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_69529c1021b4265900fa57cb6493f3be.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "OK",
+          view_str: "d35fcc1fc7eb82164101bfa67dae8526",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_d35fcc1fc7eb82164101bfa67dae8526.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Special Key",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Document End",
+          view_str: "86def093e25b50c730741890a0c0645b",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_86def093e25b50c730741890a0c0645b.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "HELP",
+          view_str: "67c647a0fac6dace33a8fbc691568771",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_67c647a0fac6dace33a8fbc691568771.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "More",
+          view_str: "480f04d1bdab6ff2655791d31ccd7983",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_480f04d1bdab6ff2655791d31ccd7983.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "- [ ] 5/13/25",
+          view_str: "4481a9e594dd78f092f1d040d7f43961",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_4481a9e594dd78f092f1d040d7f43961.png",
+          class: "android.widget.EditText",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Get format instead date or time",
+          view_str: "59f54ddcdbdc259cc877f45e11af130a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_59f54ddcdbdc259cc877f45e11af130a.png",
+          class: "android.widget.CheckBox",
+        },
+        {
+          label: "Enter or select format",
+          view_str: "4e9dc17c5f48375bbcb80aa902a73625",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_4e9dc17c5f48375bbcb80aa902a73625.png",
+          class: "android.widget.EditText",
+        },
+        {
+          label: "Choose format",
+          view_str: "f02ce4db1a74dbfda3f308f9e7a72b94",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_f02ce4db1a74dbfda3f308f9e7a72b94.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date only",
+          view_str: "a1f78cb06c9ff651d54ab469f4f32eff",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_a1f78cb06c9ff651d54ab469f4f32eff.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Italic",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Bold",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "QuickNote",
+          view_str: "046597b2795b890bde2439f66d1f753a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_046597b2795b890bde2439f66d1f753a.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "OK",
+          view_str: "d35fcc1fc7eb82164101bfa67dae8526",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_d35fcc1fc7eb82164101bfa67dae8526.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "More",
+          view_str: "c67c31ee00a6d4f37649cc21417bbb38",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c67c31ee00a6d4f37649cc21417bbb38.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Open link",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Delete lines",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Files",
+          view_str: "9ad30f5c7e74b12f7bca57dcd8dbddaf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9ad30f5c7e74b12f7bca57dcd8dbddaf.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "To-Do",
+          view_str: "6816cb86c5147f3ace2dbe604fcc34f7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_6816cb86c5147f3ace2dbe604fcc34f7.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Move text one line up",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "7aeb6fa83d70cba74b4aa2eecb1f359e",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_7aeb6fa83d70cba74b4aa2eecb1f359e.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "SEARCH / REPLACE",
+          view_str: "c9eb5c717685c703a99f9a531874fab3",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c9eb5c717685c703a99f9a531874fab3.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "CANCEL",
+          view_str: "adeb12e59624b77414a8ce245f3f8f1c",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_adeb12e59624b77414a8ce245f3f8f1c.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Date and time",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "yyyy-MM-dd",
+          view_str: "23510b083f61f4d293bb7c5d9b349ed9",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_23510b083f61f4d293bb7c5d9b349ed9.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Heading 3",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Files",
+          view_str: "9ad30f5c7e74b12f7bca57dcd8dbddaf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9ad30f5c7e74b12f7bca57dcd8dbddaf.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Files",
+          view_str: "9ad30f5c7e74b12f7bca57dcd8dbddaf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9ad30f5c7e74b12f7bca57dcd8dbddaf.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Sort by",
+          view_str: "359eae9dfa4a4783de05ea78785ccfb3",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_359eae9dfa4a4783de05ea78785ccfb3.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Create a new file or folder",
+          view_str: "522f910c78c68f592f1dca2f794265dd",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_522f910c78c68f592f1dca2f794265dd.png",
+          class: "android.widget.ImageButton",
+        },
+        {
+          label: "File QuickNote.md 5/13/2025, 4:55 AM",
+          view_str: "46898f1c98971b66cc6325f869374c43",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_46898f1c98971b66cc6325f869374c43.png",
+          class: "android.widget.LinearLayout",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Ordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Horizontal line",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Strike out",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Horizontal line",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Strike out",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "4",
+          view_str: "c9156b9754900f1e53ec34b2bbfc275c",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c9156b9754900f1e53ec34b2bbfc275c.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Strike out",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "4",
+          view_str: "c9156b9754900f1e53ec34b2bbfc275c",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c9156b9754900f1e53ec34b2bbfc275c.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Undo",
+          view_str: "68e413e0c4dd03de1c667535e919b005",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_68e413e0c4dd03de1c667535e919b005.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Save",
+          view_str: "051f4d724560e5b62e37d3fc4863c6d7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_051f4d724560e5b62e37d3fc4863c6d7.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Redo",
+          view_str: "0e512c0b603e15574f567167f10e7b94",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_0e512c0b603e15574f567167f10e7b94.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "5",
+          view_str: "a4f8bff411706ed987748b799d0d094f",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_a4f8bff411706ed987748b799d0d094f.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Inline code",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Save",
+          view_str: "051f4d724560e5b62e37d3fc4863c6d7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_051f4d724560e5b62e37d3fc4863c6d7.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Inline code",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Save",
+          view_str: "051f4d724560e5b62e37d3fc4863c6d7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_051f4d724560e5b62e37d3fc4863c6d7.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Ordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "OK",
+          view_str: "3c9132fe8ade530b62b7a1248a7ac136",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_3c9132fe8ade530b62b7a1248a7ac136.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Horizontal line",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 2",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label:
+            "> 1. 2025-05-13----\n~~~~\n~~~~  |   |   | \n  |   |   | \n---|---|---|---\n\n```\n\n```\n#   |   |   |   | \n```\n\n```\n\n---|---|---|---|---\n---|---|---|---",
+          view_str: "785745fd24fbced2c83a571d90e12db9",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_785745fd24fbced2c83a571d90e12db9.png",
+          class: "android.widget.EditText",
+        },
+        {
+          label: "Undo",
+          view_str: "68e413e0c4dd03de1c667535e919b005",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_68e413e0c4dd03de1c667535e919b005.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Heading 2",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Ordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Undo",
+          view_str: "68e413e0c4dd03de1c667535e919b005",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_68e413e0c4dd03de1c667535e919b005.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Always use current date & time",
+          view_str: "52942337f4a0cc228a8113b75e32c7a1",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_52942337f4a0cc228a8113b75e32c7a1.png",
+          class: "android.widget.CheckBox",
+        },
+        {
+          label: "OK",
+          view_str: "411ef2c41922075deb1218dacd203e08",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_411ef2c41922075deb1218dacd203e08.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "2",
+          view_str: "bfcf48d3395f6292545201efc0c4985f",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bfcf48d3395f6292545201efc0c4985f.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 3",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "3",
+          view_str: "21c1a6495ecf17e11320ff3468faca4a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_21c1a6495ecf17e11320ff3468faca4a.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Get format instead date or time",
+          view_str: "d83f08b444ce2dfa76d34b91215479f9",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_d83f08b444ce2dfa76d34b91215479f9.png",
+          class: "android.widget.CheckBox",
+        },
+        {
+          label: "yyyy-MM-dd",
+          view_str: "092316e8e0de1e67e08c07024ee25517",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_092316e8e0de1e67e08c07024ee25517.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Ordered list",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Table",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "5",
+          view_str: "a4f8bff411706ed987748b799d0d094f",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_a4f8bff411706ed987748b799d0d094f.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Inline code",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "8ea39a05d039c2e293e36594a012cf34",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_8ea39a05d039c2e293e36594a012cf34.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "```",
+          view_str: "17be54ad07694f5a8c45349a5521d3cc",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_17be54ad07694f5a8c45349a5521d3cc.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Quote",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Heading 1",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "View mode",
+          view_str: "eb2d5cb6b1afbc3b4fb50ed477535c10",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_eb2d5cb6b1afbc3b4fb50ed477535c10.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Files",
+          view_str: "4a296e1026f1256b37bd71f9c02ef576",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_4a296e1026f1256b37bd71f9c02ef576.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "File test file.md 5/13/2025, 4:42 AM",
+          view_str: "46898f1c98971b66cc6325f869374c43",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_46898f1c98971b66cc6325f869374c43.png",
+          class: "android.widget.LinearLayout",
+        },
+        {
+          label: "Date and time",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "5666c150c86b06e58a874d7ff789fa53",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_5666c150c86b06e58a874d7ff789fa53.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Attach",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Copy",
+          view_str: "c54e8054e9a4c4ee50b53f175a5fc958",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c54e8054e9a4c4ee50b53f175a5fc958.png",
+          class: "android.widget.LinearLayout",
+        },
+        {
+          label: "Attach",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Attach",
+          view_str: "07938b23ccaaaec9ef3cb02850c1e0bf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_07938b23ccaaaec9ef3cb02850c1e0bf.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Sort by",
+          view_str: "359eae9dfa4a4783de05ea78785ccfb3",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_359eae9dfa4a4783de05ea78785ccfb3.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Inline code",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Undo",
+          view_str: "be8b2ce4e58d648132daec71cdca9987",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_be8b2ce4e58d648132daec71cdca9987.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Italic",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More",
+          view_str: "c67c31ee00a6d4f37649cc21417bbb38",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c67c31ee00a6d4f37649cc21417bbb38.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Special Key",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "CANCEL",
+          view_str: "c0079550d8537d14f1832670b8d52b36",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c0079550d8537d14f1832670b8d52b36.png",
+          class: "android.widget.Button",
+        },
+        {
+          label: "Italic",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "View mode",
+          view_str: "f9248d264204dcd9745a6db6b31ef50e",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_f9248d264204dcd9745a6db6b31ef50e.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Italic",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "QuickNote",
+          view_str: "046597b2795b890bde2439f66d1f753a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_046597b2795b890bde2439f66d1f753a.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Files",
+          view_str: "9ad30f5c7e74b12f7bca57dcd8dbddaf",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9ad30f5c7e74b12f7bca57dcd8dbddaf.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Load default settings",
+          view_str: "c6dd79f3b7c9891d49f1b0c534d6b6ac",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c6dd79f3b7c9891d49f1b0c534d6b6ac.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "Load default settings",
+          view_str: "c6dd79f3b7c9891d49f1b0c534d6b6ac",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c6dd79f3b7c9891d49f1b0c534d6b6ac.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "Load default settings",
+          view_str: "c6dd79f3b7c9891d49f1b0c534d6b6ac",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c6dd79f3b7c9891d49f1b0c534d6b6ac.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "OFF",
+          view_str: "300dcfce535e43e104fe97987ebd3da2",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_300dcfce535e43e104fe97987ebd3da2.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "ON",
+          view_str: "710b6f0b97aecd3f82107b4e35ff689d",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_710b6f0b97aecd3f82107b4e35ff689d.png",
+          class: "android.widget.Switch",
+        },
+        {
+          label: "Folder .. /storage/emulated/0/Documents",
+          view_str: "46898f1c98971b66cc6325f869374c43",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_46898f1c98971b66cc6325f869374c43.png",
+          class: "android.widget.LinearLayout",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Go to",
+          view_str: "c6ec555929c216d5d492d34fc41d225a",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c6ec555929c216d5d492d34fc41d225a.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "More options",
+          view_str: "9c30c79317071f4341c231e0cf03daba",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_9c30c79317071f4341c231e0cf03daba.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Search",
+          view_str: "7aeb6fa83d70cba74b4aa2eecb1f359e",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_7aeb6fa83d70cba74b4aa2eecb1f359e.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Search in content",
+          view_str: "a3e2a5795799849b0000d5f1df6bae2f",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_a3e2a5795799849b0000d5f1df6bae2f.png",
+          class: "android.widget.CheckBox",
+        },
+        {
+          label: "To-Do",
+          view_str: "6816cb86c5147f3ace2dbe604fcc34f7",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_6816cb86c5147f3ace2dbe604fcc34f7.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Sort alphabetically",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Redo",
+          view_str: "75c011ca66deb2650ab1917029823ba5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_75c011ca66deb2650ab1917029823ba5.png",
+          class: "android.widget.TextView",
+        },
+        {
+          label: "Move text one line down",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "Archive completed tasks",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+        {
+          label: "QuickNote",
+          view_str: "bea6f2ffefb36b8463263449bf53d965",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_bea6f2ffefb36b8463263449bf53d965.png",
+          class: "android.widget.FrameLayout",
+        },
+        {
+          label: "Italic",
+          view_str: "c7a7d09e94426ad659e62e0bd32bd5b5",
+          image_path:
+            "C:\\Users\\HP\\Desktop\\kea\\ecnusse\\Kea\\output5\\view_images\\view_c7a7d09e94426ad659e62e0bd32bd5b5.png",
+          class: "android.widget.ImageView",
+        },
+      ];
+
+      rawData.forEach((d) => data.push(d));
+
+      function updateView() {
+        const d = data[currentIndex];
+        document.getElementById("viewImg").src = d.image_path;
+        document.getElementById("viewLabel").innerText = d.label;
+        document.getElementById("viewClass").innerText = d.class;
+        document.getElementById("category").value =
+          annotations[d.view_str] || "";
+      }
+
+      function prev() {
+        if (currentIndex > 0) {
+          save();
+          currentIndex--;
+          updateView();
+        }
+      }
+
+      function next() {
+        if (currentIndex < data.length - 1) {
+          save();
+          currentIndex++;
+          updateView();
+        }
+      }
+
+      function save() {
+        const d = data[currentIndex];
+        const cat = document.getElementById("category").value;
+        annotations[d.view_str] = cat;
+        console.log(`标注保存：${d.view_str} -> ${cat}`);
+      }
+
+      window.onbeforeunload = function () {
+        return "你确定要离开吗？未保存的标注可能会丢失。";
+      };
+
+      // 下载按钮
+      const dlButton = document.createElement("button");
+      dlButton.innerText = "导出标注结果";
+      dlButton.onclick = () => {
+        const blob = new Blob([JSON.stringify(annotations, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "annotations.json";
+        a.click();
+      };
+      document.body.appendChild(dlButton);
+
+      // 初始化
+      updateView();
+    </script>
+  </body>
+</html>
