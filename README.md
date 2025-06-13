@@ -73,7 +73,7 @@ Kea2 connects to and runs on Android devices. We recommend you to do a quick tes
 
 1. Connect to a real Android device or an Android emulator (only one device is enough) and make sure you can see the connected device by running `adb devices`. 
 
-2. Run `quicktest.py` to test a sample app `omninotes` (released as `omninotes.apk` in Kea2's repository). The script `quicktest.py` will automatically install and test this sample app for a short time.
+2. Run `quicktest.py` to test a sample app `omninotes` (released as `omninotes.apk` in Kea2's repository). The script `quicktest.py` will automatically install and test this sample app for a short time. 
 
 Initialize Kea2 under your preferred working directory:
 ```python
