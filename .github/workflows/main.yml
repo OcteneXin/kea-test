@@ -1,0 +1,49 @@
+name: Translate README on Update
+
+on:
+  push:
+    paths:
+      - 'README.md'
+
+jobs:
+  translate-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install dependencies
+        run: |
+          pip install openai  # 假设你用 openai/transformers 接入 deepseek-R1
+          pip install requests
+
+      - name: Translate README.md to Chinese
+        run: |
+          python translate_readme.py
+        env:
+          API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
+      - name: Commit translated README_cn.md
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          BRANCH_NAME=translated-readme-${{ github.run_id }}
+          git checkout -b $BRANCH_NAME
+          git add README_cn.md
+          git commit -m "Add Chinese translation of README"
+          git push origin $BRANCH_NAME
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.run_id }}
+          title: "Add Chinese translation of README"
+          body: "Auto-generated translation of README.md to README_cn.md"
