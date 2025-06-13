@@ -42,7 +42,7 @@ Kea2 is currently built on top of [Fastbot](https://github.com/bytedance/Fastbot
 Kea2, released as a Python library, currently works with:
 - [unittest](https://docs.python.org/3/library/unittest.html) as the testing framework; 
 - [uiautomator2](https://github.com/openatx/uiautomator2) as the UI test driver; 
-- [Fastbot](https://github.com/bytedance/Fastbot_Android) as the backend automated UI testing tool.
+- [Fastbot](https://github.com/bytedance/Fastbot_Android) as the backend automated UI testing tool. 
 
 In the future, Kea2 will be extended to support
 - [pytest](https://docs.pytest.org/en/stable/)
