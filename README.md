@@ -57,7 +57,7 @@ Running environment:
 - python 3.8+, Android 4.4+ (Android SDK installed)
 - **VPN closed** (Features 2 and 3 required)
 
-Install Kea2 by `pip`:
+Install Kea2 by `pip`: (this command will install all dependencies needed to run Kea2)
 ```bash
 python3 -m pip install kea2-python
 ```
