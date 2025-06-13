@@ -7,8 +7,8 @@ from time import sleep
 API_URL = "https://api.deepseek.com/v1/chat/completions"
 API_KEY = "sk-88f7dbe61f0d4988a6108f501c6ba33a"  # 请确保你设置了环境变量或直接替换为 API Key 字符串
 MODEL = "deepseek-chat"  # 或 deepseek-reasoner
-TRANSLATED_FILE = "../README_cn.md"
-ORIGINAL_FILE = "../README.md"
+TRANSLATED_FILE = "README_cn.md" # 相对于github根目录
+ORIGINAL_FILE = "README.md"
 SLEEP_BETWEEN_REQUESTS = 2  # 避免频率限制，可适当调整
 MAX_TOKENS = 4096
 TEMPERATURE = 0.2
