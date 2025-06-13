@@ -191,7 +191,7 @@ For the preceding always-holding property, we can write the following script to 
 ```
 >  We use [hypothesis](https://github.com/HypothesisWorks/hypothesis) to generate random texts.
 
-You can run this example by using the similar command line in Feature 2. 
+You can run this example by using the similar command line in Feature 2.  
 
 ## Documentations（更多文档）
 
