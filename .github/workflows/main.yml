@@ -5,6 +5,10 @@ on:
     paths:
       - 'README.md'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   translate-readme:
     runs-on: ubuntu-latest
@@ -45,10 +49,6 @@ jobs:
       - name: Create Pull Request manually
         run: |
           gh auth setup-git
-          gh pr create \
-            --title "Add Chinese translation of README" \
-            --body "Auto-generated translation of README.md to README_cn.md" \
-            --base master \
-            --head $BRANCH_NAME
+          gh pr create --title "Add Chinese translation of README" --body "Auto-generated translation of README.md to README_cn.md" --base master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
