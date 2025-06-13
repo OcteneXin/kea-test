@@ -16,11 +16,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.10
+          python-version: '3.9'
 
       - name: Install dependencies
         run: |
-          pip install openai  # 假设你用 openai/transformers 接入 deepseek-R1
+          python3 -m pip install --upgrade pip
           pip install requests
 
       - name: Translate README.md to Chinese
