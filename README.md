@@ -87,7 +87,7 @@ Run the quick test:
 python3 quicktest.py
 ```
 
-If you can see the app `omninotes` is successfully running and tested, Kea2 works!
+If you can see the app `omninotes` is successfully running and tested, Kea2 works! 
 Otherwise, please help [file a bug report](https://github.com/ecnusse/Kea2/issues) with the error message to us. Thank you!
 
 
