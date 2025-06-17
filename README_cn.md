@@ -33,6 +33,7 @@ Kea2 目前基于 [Fastbot](https://github.com/bytedance/Fastbot_Android) 和 [u
     <img src="docs/intro.png" style="border-radius: 14px; width: 80%; height: 80%;"/> 
     </div>
 </div>
+
 ## 设计与路线图
 Kea2作为Python库发布，当前支持：
 - 测试框架：[unittest](https://docs.python.org/3/library/unittest.html)；  
