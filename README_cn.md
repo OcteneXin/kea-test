@@ -5,6 +5,7 @@
 <div>
     <img src="https://github.com/user-attachments/assets/1a64635b-a8f2-40f1-8f16-55e47b1d74e7" style="border-radius: 14px; width: 20%; height: 20%;"/> 
 </div>
+
 ## 关于
 
 Kea2 是一个易于使用的 Python 库，旨在支持、定制和改进移动应用的自动化 UI 测试。Kea2 的创新之处在于能够将人工编写的脚本与自动化 UI 测试工具融合，从而实现许多有趣且强大的功能。
